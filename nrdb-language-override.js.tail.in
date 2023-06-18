@@ -1,3 +1,6 @@
+// TODO not in any js currently
+var formats = {"standard":{"code":"standard","name":"スタンダード"},"startup":{"code":"startup","name":"スタートアップ"}}
+
 function updateCardData(response, db) {
     var data = JSON.parse(response.text)
     data.data.forEach(entry => {
@@ -40,5 +43,218 @@ xhook.after(function(request, response) {
         updateData(response, packs)
     } else if (request.url == "/api/2.0/public/factions") {
         updateData(response, factions)
+    }
+})
+
+// missing
+// - replace 'strength' in hover window. hover window is under div class qtip-content, but strength text has no id/element itself
+// things to be careful about
+// - there's card links that don't have card names (i.e. printings under card page), make sure they don't get swapped
+// currently broken
+// - card dropdown search only works with japanese. don't think it's possible to do both, at least not without overriding the entire JS of that function
+// - likewise, card search will return translated names locally but the actual server query only uses canonical names
+// - card list for e.g. jinteki has translated names which will break that flow. not sure how to fix this one
+// - ice categorization is based on english names rather than base types
+//   see: https://github.com/NetrunnerDB/netrunnerdb/blob/a63b9bdd5f58b316b49b7276c24509b8fb3e8ed8/src/AppBundle/Service/Judge.php#L81
+
+function swapCodeName(basename, entries) {
+    Object.values(entries).map((entry) => {
+        var re = new RegExp(entry.code.charAt(0).toUpperCase() + entry.code.slice(1))
+        basename = basename.replace(re, entry.name)
+    })
+    return basename
+}
+
+function overrideCardInfo(elem, code) {
+    var card = cards[code]
+    elem.querySelectorAll(".card-title").forEach(title => {
+        title.innerHTML = card.title
+    })
+    elem.querySelectorAll(".card-text").forEach(text => {
+        text.innerHTML = NRDB.format.text(card)
+    })
+    elem.querySelectorAll(".card-type").forEach(type => {
+        var basetype = type.innerHTML.split(/ +/)[1]
+        console.info(types)
+        console.info(Object.values(types))
+        basetype = swapCodeName(basetype, types)
+
+        if (card.keywords != null) {
+            type.innerHTML = basetype + ' ' + card.keywords
+        } else {
+            type.innerHTML = basetype
+        }
+    })
+    elem.querySelectorAll(".card-stats").forEach(stats => {
+        var updated = stats.innerHTML
+        updated = updated.replace(/Memory:/, "MU:")
+        updated = updated.replace(/Strength:/, "強度:")
+        updated = updated.replace(/Influence:/, "影響:")
+        updated = updated.replace(/Link:/, "リンク:")
+        updated = updated.replace(/Deck size:/, "デッキ枚数:")
+        updated = updated.replace(/Trash:/, "トラッシュ:")
+        stats.innerHTML = updated
+    })
+    elem.querySelectorAll(".card-influence").forEach(influence => {
+        influence.innerHTML = influence.innerHTML.replace(/Influence:/, "影響:")
+    })
+}
+
+function overrideCardResults(document) {
+    document.querySelectorAll(".card").forEach(elem => {
+        var code = elem.getAttribute("data-index")
+        if (cards[code] && cards[code].title) {
+            elem.innerHTML = cards[code].title
+        }
+    })
+    Array.from(document.querySelector('.rwd-table').rows).forEach(row => {
+        var code = 0
+        Array.from(row.cells).forEach(cell => {
+            var col = cell.getAttribute('data-th')
+            if (col == 'Title') {
+                code = cell.children[0].getAttribute('data-index')
+                // Title is already overridden above
+            } else if (col == 'Type') {
+                cell.innerHTML = swapCodeName(cell.innerHTML, types)
+            } else if (col == 'Subtype') {
+                if (cards[code] && cards[code].keywords) {
+                    cell.innerHTML = cards[code].keywords
+                }
+            } else if (col == 'Set') {
+                // TODO handle this
+                //<td data-th="Set"><span class="icon icon-kitara"></span> Kampala Ascendent 101</td>
+            }
+        })
+    })
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    // card detail page
+    if (document.URL.startsWith("https://netrunnerdb.com/en/card/")) {
+        var code = document.URL.split('/').pop()
+        overrideCardInfo(document, code)
+    }
+    // swap header data (every page)
+    // just use document.links for this instead?
+    document.querySelectorAll('.navbar-nav').forEach(navbar => {
+        navbar.childNodes.forEach(elem => {
+            //console.info(elem)
+        })
+    })
+    // deck builder
+    if (document.URL.startsWith("https://netrunnerdb.com/en/deck/") ||
+        document.URL.startsWith("https://netrunnerdb.com/en/decklist/")) {
+        // format selection
+        document.querySelectorAll(".option-format").forEach(elem => {
+            console.info(elem)
+            elem.innerHTML = swapCodeName(elem.innerHTML, formats)
+        })
+        // ID selection
+        document.querySelectorAll(".identity").forEach(elem => {
+            code = elem.getAttribute("data-code")
+            var card = cards[code]
+            //console.info(card)
+            // N.B. there's only one of the following for each, it could be simplified
+            elem.querySelectorAll(".name").forEach(identity => {
+                if (card && card.title != null) {
+                    identity.innerHTML = card.title
+                }
+            })
+            elem.querySelectorAll(".small").forEach(pack => {
+                if (card && card.pack != null) {
+                    // TODO derp, no pack info -- needs to be pulled from nrdb.cards instead
+                    pack.innerHTML = card.pack
+                }
+            })
+        })
+        let deckStatsMO = new MutationObserver(function(mutations) {
+            deckStatsMO.disconnect()
+            mutations.forEach(function(mutation) {
+                var elem = mutation.target
+                var text = elem.innerHTML
+                if (elem.id == "influence") {
+                    // ex: 0 influence spent (max 15, available 15)
+                    elem.innerHTML = text.replace(/(\d+) influence spent \(max (\d+), available (-?\d+)\)/, "$1影響($2上限$3残り)")
+                } else if (elem.id == "agendapoints") {
+                    // ex: 9 agenda points (between 20 and 21)
+                    elem.innerHTML = text.replace(/(\d+) agenda points \(between (\d+) and (\d+)\)/, "$1計画書ポイント($2~$3)")
+                } else if (elem.id == "cardcount") {
+                    // ex: 0 cards (min 45)
+                    elem.innerHTML = text.replace(/(\d+) cards \(min (\d+)\)/, "$1枚(下限$2)")
+                } else if (elem.id == "latestpack") {
+                    // ex: Cards up to ...
+                    elem.innerHTML = text.replace(/Cards up to (.*)/, "$1まで含める")
+                }
+            })
+            // fix selection under collections tab. doesn't cover NSG only / Any / All
+            Object.values(formats).map((format) => {
+                document.querySelectorAll("#collection_" + format.code).forEach(element => {
+                    element.innerHTML = format.name
+                })
+            })
+            observe()
+        })
+
+        const observe = ()=> {
+            deckStatsMO.observe(document.querySelector("#influence"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
+            deckStatsMO.observe(document.querySelector("#agendapoints"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
+            deckStatsMO.observe(document.querySelector("#cardcount"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
+        };
+        observe();
+    }
+
+    if (document.URL.startsWith("https://netrunnerdb.com/en/sets")) {
+        document.querySelectorAll(".card").forEach(elem => {
+            var code = elem.getAttribute("data-index")
+            console.info(elem)
+            if (packs[code]) {
+                // TODO childnode writes don't work
+                elem.childNodes[2] = packs[code].name
+            }
+        })
+    }
+
+    if (document.URL.startsWith("https://netrunnerdb.com/en/set/") ||
+        document.URL.startsWith("https://netrunnerdb.com/en/cycle/")) {
+        overrideCardResults(document)
+    } else if (document.URL.startsWith("https://netrunnerdb.com/find/")) {
+        // find can either return card results or a card page
+        var elem = document.querySelector(".card-image")
+        if (elem) {
+            var code = elem.children[0].getAttribute('data-src').split('/').pop().split('.')[0]
+            overrideCardInfo(document, code)
+        } else {
+            overrideCardResults(document)
+        }
+    }
+})
+
+window.addEventListener('load', function() {
+    // swap link names to cards / sets
+    for (var i = 0, l=document.links.length; i<l; i++) {
+        var url = document.links[i].getAttribute('href')
+        if (url.startsWith('/en/card/')) {
+            var code = url.split('/')[3]
+            var card = cards[code]
+            if (card && card.title != null) {
+                if (document.links[i].parentElement.className == "previous") {
+                    document.links[i].innerHTML = "← " + card.title
+                } else if (document.links[i].parentElement.className == "next") {
+                    document.links[i].innerHTML = card.title + " →"
+                }
+            }
+        } else if (url.startsWith('/en/set/')) {
+            var code = url.split('/')[3]
+            var set = packs[code]
+            if (set && set.name != null) {
+                if (document.links[i].parentElement.className == "previous") {
+                    document.links[i].innerHTML = "← " + set.name
+                } else if (document.links[i].parentElement.className == "next") {
+                    document.links[i].innerHTML = set.name + " →"
+                } else {
+                    document.links[i].innerHTML = set.name
+                }
+            }
+        }
     }
 })
