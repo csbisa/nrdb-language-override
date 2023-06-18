@@ -1,0 +1,43 @@
+// TODO need to deal with refreshes / liveness
+function updateCardData(text, db) {
+    var data = JSON.parse(text)
+    data.data.forEach(entry => {
+        var card = cards[entry.code]
+        if (card) {
+            if (card.title) {
+                entry.title = card.title
+            }
+            if (card.text) {
+                entry.text = card.text
+            }
+            if (card.keywords) {
+                entry.keywords = card.keywords
+            }
+        }
+    })
+    return JSON.stringify(data)
+}
+
+function updateData(text, db) {
+    var data = JSON.parse(text)
+    data.data.forEach(entry => {
+        if (db[entry.code] && db[entry.code].name) {
+            entry.name = db[entry.code].name
+        }
+    })
+    return JSON.stringify(data)
+}
+
+xhook.after(function(request, response) {
+    if (request.url == "/api/2.0/public/cards") {
+        response.text = updateCardData(response.text, cards)
+    } else if (request.url == "/api/2.0/public/types") {
+         response.text = updateData(response.text, types)
+    } else if (request.url == "/api/2.0/public/cycles") {
+        response.text = updateData(response.text, cycles)
+    } else if (request.url == "/api/2.0/public/packs") {
+        response.text = updateData(response.text, packs)
+    } else if (request.url == "/api/2.0/public/factions") {
+        response.text = updateData(response.text, factions)
+    }
+})

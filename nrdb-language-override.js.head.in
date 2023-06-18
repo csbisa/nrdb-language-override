@@ -1,0 +1,12 @@
+// ==UserScript==
+// @name         NRDB card language override
+// @namespace    https://github.com/csbisa/nrdb-language-override
+// @version      0.1
+// @description  Replace NRDB card data (titles, text, etc) with localized data
+// @author       csbisa
+// @match        https://netrunnerdb.com/*
+// @icon         https://netrunnerdb.com/favicon.ico
+// @grant        none
+// @require      http://jpillora.com/xhook/dist/xhook.js
+// @run-at       document-start
+// ==/UserScript==
