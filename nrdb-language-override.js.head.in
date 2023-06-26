@@ -10,3 +10,5 @@
 // @require      http://jpillora.com/xhook/dist/xhook.js
 // @run-at       document-start
 // ==/UserScript==
+
+var version = "0.1"

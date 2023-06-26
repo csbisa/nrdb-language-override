@@ -9,7 +9,6 @@ endef
 
 nrdb-language-override.${LANG}.user.js: nrdb-language-override.js.head.in nrdb-language-override.js.tail.in formats.json stats.json
 	cat nrdb-language-override.js.head.in > $@
-	echo >> $@
 	echo "var locale = '${LANG}'" >> $@
 	echo "var locale_text = '${LANG_TEXT}'" >> $@
 	echo -n "var cards = " >> $@

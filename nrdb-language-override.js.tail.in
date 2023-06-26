@@ -1,3 +1,9 @@
+// regenerate the DB on a version update
+if (localStorage.getItem("version") != version) {
+    localStorage.setItem("version", version)
+    indexedDB.deleteDatabase("ForerunnerDB")
+}
+
 var lang = localStorage.getItem("language")
 if (lang == null) {
     lang = locale
