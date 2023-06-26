@@ -1,6 +1,7 @@
 # TODO
 JSON_DIR=~/netrunner/cards/netrunner-cards-json
 LANG=ja
+LANG_TEXT="日本語"
 
 define output_json
 	jq -s add ${1} | jq 'del(..|nulls)' | jq 'INDEX(.code)' | jq -r tostring >> $@
@@ -10,6 +11,7 @@ nrdb-language-override.${LANG}.user.js: nrdb-language-override.js.head.in nrdb-l
 	cat nrdb-language-override.js.head.in > $@
 	echo >> $@
 	echo "var locale = '${LANG}'" >> $@
+	echo "var locale_text = '${LANG_TEXT}'" >> $@
 	echo -n "var cards = " >> $@
 	$(call output_json, ${JSON_DIR}/translations/${LANG}/pack/*.${LANG}.json) >> $@
 	echo -n "var types = " >> $@

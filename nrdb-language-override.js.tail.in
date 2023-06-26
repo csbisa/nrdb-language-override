@@ -1,3 +1,37 @@
+var lang = localStorage.getItem("language")
+if (lang == null) {
+    lang = locale
+    localStorage.setItem("language", lang)
+}
+
+function updateLanguage() {
+    if (lang == locale) {
+        localStorage.setItem("language", "en")
+    } else {
+        localStorage.setItem("language", locale)
+    }
+    // nrdb releases data regardless of updates if data is present, so we need to nuke the db to
+    // make sure the language change applies on the first refresh
+    indexedDB.deleteDatabase("ForerunnerDB")
+    location.reload()
+}
+
+function insertLanguageSelector(document) {
+    var text = document.createElement('a')
+    var elem = document.createElement('li')
+
+    text.setAttribute('href', "#")
+    text.addEventListener("click", updateLanguage, false)
+    if (lang == locale) {
+        text.innerHTML = 'English'
+    } else {
+        text.innerHTML = locale_text
+    }
+
+    elem.appendChild(text)
+    document.querySelector('.navbar-right').appendChild(elem)
+}
+
 function updateCardData(response, db) {
     var data = JSON.parse(response.text)
     data.data.forEach(entry => {
@@ -15,7 +49,7 @@ function updateCardData(response, db) {
         }
     })
     response.text = JSON.stringify(data)
-    response.headers["content-language"] = locale
+    response.headers["content-language"] = lang
 }
 
 function updateData(response, db) {
@@ -26,10 +60,14 @@ function updateData(response, db) {
         }
     })
     response.text = JSON.stringify(data)
-    response.headers["content-language"] = locale
+    response.headers["content-language"] = lang
 }
 
 xhook.after(function(request, response) {
+    // only override info if we're actually using not english
+    if (lang != locale) {
+        return
+    }
     if (request.url == "/api/2.0/public/cards") {
         updateCardData(response, cards)
     } else if (request.url == "/api/2.0/public/types") {
@@ -131,6 +169,11 @@ function overrideCardResults(document) {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+    // insert our language dropdown
+    insertLanguageSelector(document)
+    if (lang != locale) {
+        return
+    }
     // card detail page
     if (document.URL.startsWith("https://netrunnerdb.com/en/card/")) {
         var code = document.URL.split('/').pop()
@@ -232,6 +275,9 @@ window.addEventListener('DOMContentLoaded', function() {
 })
 
 window.addEventListener('load', function() {
+    if (lang != locale) {
+        return
+    }
     // swap link names to cards / sets
     for (var i = 0, l=document.links.length; i<l; i++) {
         var url = document.links[i].getAttribute('href')
