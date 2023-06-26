@@ -114,6 +114,27 @@ function swapEntryNames(basename, entries) {
     return basename
 }
 
+function overrideCardImage(elem) {
+    var url = elem.getAttribute("data-src")
+    if (url) {
+        elem.setAttribute('onerror', "this.src='" + url + "'")
+        elem.setAttribute('data-src', url.replace(/\/v1\//, "/v1/" + locale + "/"))
+    }
+    if (elem.src) {
+        elem.setAttribute('onerror', "this.src='" + elem.src + "'")
+        elem.src = dataUrl.replace(/\/v1\//, "/v1/" + locale + "/")
+    }
+}
+
+function handleCardImage(document) {
+    document.querySelectorAll(".card-image").forEach(elem => {
+        var dataUrl = elem.getAttribute("data-src")
+        if (dataUrl) {
+            overrideCardImage(elem)
+        }
+    })
+}
+
 function overrideCardInfo(elem, code) {
     var card = cards[code]
 
@@ -146,6 +167,8 @@ function overrideCardInfo(elem, code) {
     elem.querySelectorAll(".card-influence").forEach(influence => {
         influence.innerHTML = swapEntryNames(influence.innerHTML, stats)
     })
+
+    handleCardImage(elem)
 }
 
 function overrideCardResults(document) {
@@ -245,15 +268,15 @@ window.addEventListener('DOMContentLoaded', function() {
                     element.innerHTML = format.name
                 })
             })
-            observe()
+            observeDeckStats()
         })
 
-        const observe = ()=> {
+        const observeDeckStats = ()=> {
             deckStatsMO.observe(document.querySelector("#influence"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
             deckStatsMO.observe(document.querySelector("#agendapoints"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
             deckStatsMO.observe(document.querySelector("#cardcount"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
-        };
-        observe();
+        }
+        observeDeckStats()
     }
 
     if (document.URL.startsWith("https://netrunnerdb.com/en/sets")) {
@@ -313,4 +336,22 @@ window.addEventListener('load', function() {
             }
         }
     }
+
+    let cardImageMO = new MutationObserver(function(mutations) {
+        cardImageMO.disconnect()
+        mutations.forEach(function(mutation) {
+            var elem = mutation.target.querySelector(".modal-image")
+            if (elem) {
+                overrideCardImage(elem.children[0])
+            }
+        })
+        observeCardImages()
+    })
+
+    const observeCardImages = ()=> {
+        if (document.querySelector("#cardModal")) {
+            cardImageMO.observe(document.querySelector("#cardModal"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
+        }
+    }
+    observeCardImages()
 })
