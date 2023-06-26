@@ -64,24 +64,29 @@ function swapCodeName(basename, entries) {
 
 function overrideCardInfo(elem, code) {
     var card = cards[code]
-    elem.querySelectorAll(".card-title").forEach(title => {
-        title.innerHTML = card.title
-    })
-    elem.querySelectorAll(".card-text").forEach(text => {
-        text.innerHTML = NRDB.format.text(card)
-    })
-    elem.querySelectorAll(".card-type").forEach(type => {
-        var basetype = type.innerHTML.split(/ +/)[1]
-        console.info(types)
-        console.info(Object.values(types))
-        basetype = swapCodeName(basetype, types)
 
-        if (card.keywords != null) {
-            type.innerHTML = basetype + ' ' + card.keywords
-        } else {
-            type.innerHTML = basetype
-        }
-    })
+    if (card != null) {
+        elem.querySelectorAll(".card-title").forEach(title => {
+            if (card.title) {
+                title.innerHTML = card.title
+            }
+        })
+        elem.querySelectorAll(".card-text").forEach(text => {
+            if (card.text) {
+                text.innerHTML = NRDB.format.text(card)
+            }
+        })
+        elem.querySelectorAll(".card-type").forEach(type => {
+            var basetype = type.innerHTML.split(/ +/)[1]
+            basetype = swapCodeName(basetype, types)
+
+            if (card.keywords != null) {
+                type.innerHTML = basetype + ' ' + card.keywords
+            } else {
+                type.innerHTML = basetype
+            }
+        })
+    }
     elem.querySelectorAll(".card-stats").forEach(stats => {
         var updated = stats.innerHTML
         updated = updated.replace(/Memory:/, "MU:")
