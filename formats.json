@@ -1,0 +1,12 @@
+{
+  "ja": {
+    "standard": {
+      "code": "standard",
+      "name": "スタンダード"
+    },
+    "startup": {
+      "code": "startup",
+      "name": "スタートアップ"
+    }
+  }
+}

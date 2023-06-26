@@ -1,6 +1,3 @@
-// TODO not in any js currently
-var formats = {"standard":{"code":"standard","name":"スタンダード"},"startup":{"code":"startup","name":"スタートアップ"}}
-
 function updateCardData(response, db) {
     var data = JSON.parse(response.text)
     data.data.forEach(entry => {

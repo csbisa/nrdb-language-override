@@ -6,7 +6,7 @@ define output_json
 	jq -s add ${1} | jq 'del(..|nulls)' | jq 'INDEX(.code)' | jq -r tostring >> $@
 endef
 
-nrdb-language-override.${LANG}.user.js: nrdb-language-override.js.head.in nrdb-language-override.js.tail.in
+nrdb-language-override.${LANG}.user.js: nrdb-language-override.js.head.in nrdb-language-override.js.tail.in formats.json stats.json
 	cat nrdb-language-override.js.head.in > $@
 	echo >> $@
 	echo "var locale = '${LANG}'" >> $@
@@ -22,6 +22,10 @@ nrdb-language-override.${LANG}.user.js: nrdb-language-override.js.head.in nrdb-l
 	$(call output_json, ${JSON_DIR}/translations/${LANG}/factions.${LANG}.json) >> $@
 	echo -n "var sides = " >> $@
 	$(call output_json, ${JSON_DIR}/translations/${LANG}/sides.${LANG}.json) >> $@
+	echo -n "var formats = " >> $@
+	jq ".${LANG}" formats.json | jq -r tostring >> $@
+	echo -n "var stats = " >> $@
+	jq ".${LANG}" stats.json | jq -r tostring >> $@
 	echo >> $@
 	cat nrdb-language-override.js.tail.in >> $@
 
