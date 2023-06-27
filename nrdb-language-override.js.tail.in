@@ -106,6 +106,14 @@ function swapCodeName(basename, entries) {
     return basename
 }
 
+function swapEntryNames(basename, entries) {
+    Object.entries(entries).map((entry) => {
+        var re = new RegExp(entry[0] + ":")
+        basename = basename.replace(re, entry[1] + ":")
+    })
+    return basename
+}
+
 function overrideCardInfo(elem, code) {
     var card = cards[code]
 
@@ -131,18 +139,12 @@ function overrideCardInfo(elem, code) {
             }
         })
     }
-    elem.querySelectorAll(".card-stats").forEach(stats => {
-        var updated = stats.innerHTML
-        updated = updated.replace(/Memory:/, "MU:")
-        updated = updated.replace(/Strength:/, "強度:")
-        updated = updated.replace(/Influence:/, "影響:")
-        updated = updated.replace(/Link:/, "リンク:")
-        updated = updated.replace(/Deck size:/, "デッキ枚数:")
-        updated = updated.replace(/Trash:/, "トラッシュ:")
-        stats.innerHTML = updated
+
+    elem.querySelectorAll(".card-stats").forEach(stat => {
+        stat.innerHTML = swapEntryNames(stat.innerHTML, stats)
     })
     elem.querySelectorAll(".card-influence").forEach(influence => {
-        influence.innerHTML = influence.innerHTML.replace(/Influence:/, "影響:")
+        influence.innerHTML = swapEntryNames(influence.innerHTML, stats)
     })
 }
 
