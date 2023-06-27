@@ -95,8 +95,6 @@ xhook.after(function(request, response) {
 // - card dropdown search only works with japanese. don't think it's possible to do both, at least not without overriding the entire JS of that function
 // - likewise, card search will return translated names locally but the actual server query only uses canonical names
 // - card list for e.g. jinteki has translated names which will break that flow. not sure how to fix this one
-// - ice categorization is based on english names rather than base types
-//   see: https://github.com/NetrunnerDB/netrunnerdb/blob/a63b9bdd5f58b316b49b7276c24509b8fb3e8ed8/src/AppBundle/Service/Judge.php#L81
 
 function swapCodeName(basename, entries) {
     Object.values(entries).map((entry) => {
@@ -199,6 +197,48 @@ function overrideCardResults(document) {
     })
 }
 
+function moveCardCategory(type, dest, child) {
+    dest.appendChild(child)
+    var count = parseInt(child.innerHTML.split('x')[0])
+    Array.from(document.getElementsByTagName('h5')).forEach(elem => {
+        if (elem.children[0].alt == type) {
+            var old_count = parseInt(elem.children[1].innerHTML) || 0
+            elem.children[1].innerHTML = old_count + count
+            if (old_count == 0) {
+                elem.setAttribute("style", "")
+            }
+        } else if (elem.children[0].alt == 'Other') {
+            var old_count = parseInt(elem.children[1].innerHTML)
+            elem.children[1].innerHTML = old_count - count
+            if ((old_count - count) == 0) {
+                elem.setAttribute("style", "display: none;")
+            }
+        }
+    })
+}
+
+// ice categorization is based on english names rather than base types, so we need to fix these
+// see: https://github.com/NetrunnerDB/netrunnerdb/blob/a63b9bdd5f58b316b49b7276c24509b8fb3e8ed8/src/AppBundle/Service/Judge.php#L81
+function fixCardCategorization() {
+    Array.from(document.querySelector('.deck-none').children).forEach(elem => {
+        var code = elem.children[0].getAttribute('data-index')
+        if (cards[code] && cards[code].keywords) {
+            var is_barrier = cards[code].keywords.includes("バリア")
+            var is_code_gate = cards[code].keywords.includes("コードゲート")
+            var is_sentry = cards[code].keywords.includes("セントリー")
+            if ((is_barrier && is_code_gate) || (is_barrier && is_sentry) || (is_code_gate && is_sentry)) {
+                moveCardCategory("Multi", document.querySelector('.deck-multi'), elem)
+            } else if (is_barrier) {
+                moveCardCategory("Barrier", document.querySelector('.deck-barrier'), elem)
+            } else if (is_code_gate) {
+                moveCardCategory("Code Gate", document.querySelector('.deck-code-gate'), elem)
+            } else if (is_sentry) {
+                moveCardCategory("Sentry", document.querySelector('.deck-sentry'), elem)
+            }
+        }
+    })
+}
+
 window.addEventListener('DOMContentLoaded', function() {
     // insert our language dropdown
     insertLanguageSelector(document)
@@ -277,6 +317,17 @@ window.addEventListener('DOMContentLoaded', function() {
             deckStatsMO.observe(document.querySelector("#cardcount"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
         }
         observeDeckStats()
+
+        let deckCardsMO = new MutationObserver(function(mutations) {
+            deckCardsMO.disconnect()
+            fixCardCategorization()
+            observeDeckCards()
+        })
+
+        const observeDeckCards = ()=> {
+            deckCardsMO.observe(document.querySelector("#deck-content"), { attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true, characterDataOldValue: true });
+        }
+        observeDeckCards()
     }
 
     if (document.URL.startsWith("https://netrunnerdb.com/en/sets")) {
