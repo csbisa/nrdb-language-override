@@ -4,6 +4,8 @@
 // @version      1.0
 // @description  Replace NRDB card data (titles, text, etc) with localized data
 // @author       csbisa
+// @downloadURL  https://github.com/csbisa/nrdb-language-override/releases/latest/download/nrdb-language-override.ja.user.js
+// @updateURL    https://github.com/csbisa/nrdb-language-override/releases/latest/download/nrdb-language-override.ja.user.js
 // @match        https://netrunnerdb.com/*
 // @icon         https://netrunnerdb.com/favicon.ico
 // @grant        none
