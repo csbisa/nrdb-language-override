@@ -89,12 +89,13 @@ xhook.after(function(request, response) {
 
 // missing
 // - replace 'strength' in hover window. hover window is under div class qtip-content, but strength text has no id/element itself
+// - swapping info in /api/2.0/public/sides but it doesn't seem to be used for anything
 // things to be careful about
 // - there's card links that don't have card names (i.e. printings under card page), make sure they don't get swapped
+// - card list for e.g. jinteki has translated names which will break that flow. have to switch to english when doing that
 // currently broken
 // - card dropdown search only works with japanese. don't think it's possible to do both, at least not without overriding the entire JS of that function
 // - likewise, card search will return translated names locally but the actual server query only uses canonical names
-// - card list for e.g. jinteki has translated names which will break that flow. not sure how to fix this one
 
 function swapCodeName(basename, entries) {
     Object.values(entries).map((entry) => {
@@ -262,14 +263,12 @@ window.addEventListener('DOMContentLoaded', function() {
         document.URL.startsWith("https://netrunnerdb.com/en/decklist/")) {
         // format selection
         document.querySelectorAll(".option-format").forEach(elem => {
-            console.info(elem)
             elem.innerHTML = swapCodeName(elem.innerHTML, formats)
         })
         // ID selection
         document.querySelectorAll(".identity").forEach(elem => {
             code = elem.getAttribute("data-code")
             var card = cards[code]
-            //console.info(card)
             // N.B. there's only one of the following for each, it could be simplified
             elem.querySelectorAll(".name").forEach(identity => {
                 if (card && card.title != null) {
@@ -333,7 +332,6 @@ window.addEventListener('DOMContentLoaded', function() {
     if (document.URL.startsWith("https://netrunnerdb.com/en/sets")) {
         document.querySelectorAll(".card").forEach(elem => {
             var code = elem.getAttribute("data-index")
-            console.info(elem)
             if (packs[code]) {
                 // TODO childnode writes don't work
                 elem.childNodes[2] = packs[code].name
