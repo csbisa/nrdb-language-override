@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NRDB card language override
 // @namespace    https://github.com/csbisa/nrdb-language-override
-// @version      1.0
+// @version      1.1
 // @description  Replace NRDB card data (titles, text, etc) with localized data
 // @author       csbisa
 // @downloadURL  https://github.com/csbisa/nrdb-language-override/releases/latest/download/nrdb-language-override.ja.user.js
@@ -13,4 +13,4 @@
 // @run-at       document-start
 // ==/UserScript==
 
-var version = "1.0"
+var version = "1.1"
