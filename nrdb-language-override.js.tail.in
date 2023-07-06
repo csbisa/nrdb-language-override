@@ -148,6 +148,11 @@ function overrideCardInfo(elem, code) {
                 text.innerHTML = NRDB.format.text(card)
             }
         })
+        elem.querySelectorAll(".card-flavor").forEach(text => {
+            if (card.flavor) {
+                text.innerHTML = card.flavor
+            }
+        })
         elem.querySelectorAll(".card-type").forEach(type => {
             var basetype = type.innerHTML.split(/ +/)[1]
             basetype = swapCodeName(basetype, types)
