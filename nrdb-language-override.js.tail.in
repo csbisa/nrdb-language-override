@@ -203,7 +203,7 @@ function overrideCardResults(document) {
     })
 }
 
-function moveCardCategory(type, dest, child) {
+function moveCardCategory(type, dest, child, source) {
     dest.appendChild(child)
     var count = parseInt(child.innerHTML.split('x')[0])
     Array.from(document.getElementsByTagName('h5')).forEach(elem => {
@@ -213,7 +213,7 @@ function moveCardCategory(type, dest, child) {
             if (old_count == 0) {
                 elem.setAttribute("style", "")
             }
-        } else if (elem.children[0].alt == 'Other') {
+        } else if (elem.children[0].alt == source) {
             var old_count = parseInt(elem.children[1].innerHTML)
             elem.children[1].innerHTML = old_count - count
             if ((old_count - count) == 0) {
@@ -233,13 +233,22 @@ function fixCardCategorization() {
             var is_code_gate = cards[code].keywords.includes("コードゲート")
             var is_sentry = cards[code].keywords.includes("セントリー")
             if ((is_barrier && is_code_gate) || (is_barrier && is_sentry) || (is_code_gate && is_sentry)) {
-                moveCardCategory("Multi", document.querySelector('.deck-multi'), elem)
+                moveCardCategory("Multi", document.querySelector('.deck-multi'), elem, 'Other')
             } else if (is_barrier) {
-                moveCardCategory("Barrier", document.querySelector('.deck-barrier'), elem)
+                moveCardCategory("Barrier", document.querySelector('.deck-barrier'), elem, 'Other')
             } else if (is_code_gate) {
-                moveCardCategory("Code Gate", document.querySelector('.deck-code-gate'), elem)
+                moveCardCategory("Code Gate", document.querySelector('.deck-code-gate'), elem, 'Other')
             } else if (is_sentry) {
-                moveCardCategory("Sentry", document.querySelector('.deck-sentry'), elem)
+                moveCardCategory("Sentry", document.querySelector('.deck-sentry'), elem, 'Other')
+            }
+        }
+    })
+    Array.from(document.querySelector('.deck-program').children).forEach(elem => {
+        var code = elem.children[0].getAttribute('data-index')
+        if (cards[code] && cards[code].keywords) {
+            var is_icebreaker = cards[code].keywords.includes("アイスブレイカー")
+            if (is_icebreaker) {
+                moveCardCategory("Icebreaker", document.querySelector('.deck-icebreaker'), elem, 'Program')
             }
         }
     })
