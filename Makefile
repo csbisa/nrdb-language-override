@@ -1,35 +1,36 @@
 # TODO
 JSON_DIR=~/netrunner/cards/netrunner-cards-json
-LANG=ja
-LANG_TEXT="日本語"
+
+LANGS=ja
+
+all: ${LANGS:%=nrdb-language-override.%.user.js}
 
 define output_json
 	jq -s add ${1} | jq 'del(..|nulls)' | jq 'INDEX(.code)' | jq -r tostring >> $@
 endef
 
-nrdb-language-override.${LANG}.user.js: nrdb-language-override.js.head.in nrdb-language-override.js.tail.in formats.json stats.json display.json
+nrdb-language-override.%.user.js: nrdb-language-override.js.head.in nrdb-language-override.js.tail.in formats.json stats.json display.json langs.json
 	cat nrdb-language-override.js.head.in > $@
-	echo "var locale = '${LANG}'" >> $@
-	echo "var locale_text = '${LANG_TEXT}'" >> $@
+	echo "var locale = '$*'" >> $@
+	echo -n "var locale_text = " >> $@
+	jq .$* langs.json >> $@
 	echo -n "var cards = " >> $@
-	$(call output_json, ${JSON_DIR}/translations/${LANG}/pack/*.${LANG}.json) >> $@
+	$(call output_json, ${JSON_DIR}/translations/$*/pack/*.$*.json) >> $@
 	echo -n "var types = " >> $@
-	$(call output_json, ${JSON_DIR}/translations/${LANG}/types.${LANG}.json) >> $@
+	$(call output_json, ${JSON_DIR}/translations/$*/types.$*.json) >> $@
 	echo -n "var cycles = " >> $@
-	$(call output_json, ${JSON_DIR}/translations/${LANG}/cycles.${LANG}.json) >> $@
+	$(call output_json, ${JSON_DIR}/translations/$*/cycles.$*.json) >> $@
 	echo -n "var packs = " >> $@
-	$(call output_json, ${JSON_DIR}/translations/${LANG}/packs.${LANG}.json) >> $@
+	$(call output_json, ${JSON_DIR}/translations/$*/packs.$*.json) >> $@
 	echo -n "var factions = " >> $@
-	$(call output_json, ${JSON_DIR}/translations/${LANG}/factions.${LANG}.json) >> $@
+	$(call output_json, ${JSON_DIR}/translations/$*/factions.$*.json) >> $@
 	echo -n "var sides = " >> $@
-	$(call output_json, ${JSON_DIR}/translations/${LANG}/sides.${LANG}.json) >> $@
+	$(call output_json, ${JSON_DIR}/translations/$*/sides.$*.json) >> $@
 	echo -n "var formats = " >> $@
-	jq ".${LANG}" formats.json | jq -r tostring >> $@
+	jq ".$*" formats.json | jq -r tostring >> $@
 	echo -n "var stats = " >> $@
-	jq ".${LANG}" stats.json | jq -r tostring >> $@
+	jq ".$*" stats.json | jq -r tostring >> $@
 	echo -n "var display = " >> $@
-	jq ".${LANG}" display.json | jq -r tostring >> $@
+	jq ".$*" display.json | jq -r tostring >> $@
 	echo >> $@
 	cat nrdb-language-override.js.tail.in >> $@
-
-all: nrdb-language-override.${LANG}.user.js
