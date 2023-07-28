@@ -303,16 +303,16 @@ window.addEventListener('DOMContentLoaded', function() {
                 var text = elem.innerHTML
                 if (elem.id == "influence") {
                     // ex: 0 influence spent (max 15, available 15)
-                    elem.innerHTML = text.replace(/(\d+) influence spent \(max (\d+), available (-?\d+)\)/, "$1影響($2上限$3残り)")
+                    elem.innerHTML = text.replace(/(\d+) influence spent \(max (\d+), available (-?\d+)\)/, display["influence"])
                 } else if (elem.id == "agendapoints") {
                     // ex: 9 agenda points (between 20 and 21)
-                    elem.innerHTML = text.replace(/(\d+) agenda points \(between (\d+) and (\d+)\)/, "$1計画書ポイント($2~$3)")
+                    elem.innerHTML = text.replace(/(\d+) agenda points \(between (\d+) and (\d+)\)/, display["agendapoints"])
                 } else if (elem.id == "cardcount") {
                     // ex: 0 cards (min 45)
-                    elem.innerHTML = text.replace(/(\d+) cards \(min (\d+)\)/, "$1枚(下限$2)")
+                    elem.innerHTML = text.replace(/(\d+) cards \(min (\d+)\)/, display["cardcount"])
                 } else if (elem.id == "latestpack") {
                     // ex: Cards up to ...
-                    elem.innerHTML = text.replace(/Cards up to (.*)/, "$1まで含める")
+                    elem.innerHTML = text.replace(/Cards up to (.*)/, display["latestpack"])
                 }
             })
             // fix selection under collections tab. doesn't cover NSG only / Any / All

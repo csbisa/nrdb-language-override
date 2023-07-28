@@ -1,0 +1,14 @@
+{
+  "en": {
+    "influence": "$1 influence spent (max $2, available $3)",
+    "agendapoints": "$1 agenda points (between $2 and $3)",
+    "cardcount": "$1 cards (min $2)",
+    "latestpack": "Cards up to $1"
+  },
+  "ja": {
+    "influence": "$1影響($2上限$3残り)",
+    "agendapoints": "$1計画書ポイント($2~$3)",
+    "cardcount": "$1枚(下限$2)",
+    "latestpack": "$1まで含める"
+  }
+}
