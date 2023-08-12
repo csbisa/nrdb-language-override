@@ -203,10 +203,10 @@ function overrideCardResults(document) {
     })
 }
 
-function moveCardCategory(type, dest, child, source) {
+function moveCardCategory(parent, type, dest, child, source) {
     dest.appendChild(child)
     var count = parseInt(child.innerHTML.split('x')[0])
-    Array.from(document.getElementsByTagName('h5')).forEach(elem => {
+    Array.from(parent.getElementsByTagName('h5')).forEach(elem => {
         if (elem.children[0].alt == type) {
             var old_count = parseInt(elem.children[1].innerHTML) || 0
             elem.children[1].innerHTML = old_count + count
@@ -226,6 +226,7 @@ function moveCardCategory(type, dest, child, source) {
 // ice categorization is based on english names rather than base types, so we need to fix these
 // see: https://github.com/NetrunnerDB/netrunnerdb/blob/a63b9bdd5f58b316b49b7276c24509b8fb3e8ed8/src/AppBundle/Service/Judge.php#L81
 function fixCardCategorization() {
+    var deck = document.querySelector('#deck')
     Array.from(document.querySelector('.deck-none').children).forEach(elem => {
         var code = elem.children[0].getAttribute('data-index')
         if (cards[code] && cards[code].keywords) {
@@ -233,13 +234,13 @@ function fixCardCategorization() {
             var is_code_gate = cards[code].keywords.includes(types["code-gate"].name)
             var is_sentry = cards[code].keywords.includes(types["sentry"].name)
             if ((is_barrier && is_code_gate) || (is_barrier && is_sentry) || (is_code_gate && is_sentry)) {
-                moveCardCategory("Multi", document.querySelector('.deck-multi'), elem, 'Other')
+                moveCardCategory(deck, "Multi", document.querySelector('.deck-multi'), elem, 'Other')
             } else if (is_barrier) {
-                moveCardCategory("Barrier", document.querySelector('.deck-barrier'), elem, 'Other')
+                moveCardCategory(deck, "Barrier", document.querySelector('.deck-barrier'), elem, 'Other')
             } else if (is_code_gate) {
-                moveCardCategory("Code Gate", document.querySelector('.deck-code-gate'), elem, 'Other')
+                moveCardCategory(deck, "Code Gate", document.querySelector('.deck-code-gate'), elem, 'Other')
             } else if (is_sentry) {
-                moveCardCategory("Sentry", document.querySelector('.deck-sentry'), elem, 'Other')
+                moveCardCategory(deck, "Sentry", document.querySelector('.deck-sentry'), elem, 'Other')
             }
         }
     })
@@ -248,7 +249,7 @@ function fixCardCategorization() {
         if (cards[code] && cards[code].keywords) {
             var is_icebreaker = cards[code].keywords.includes(types["icebreaker"].name)
             if (is_icebreaker) {
-                moveCardCategory("Icebreaker", document.querySelector('.deck-icebreaker'), elem, 'Program')
+                moveCardCategory(deck, "Icebreaker", document.querySelector('.deck-icebreaker'), elem, 'Program')
             }
         }
     })
