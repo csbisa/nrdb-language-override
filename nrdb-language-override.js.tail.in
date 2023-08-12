@@ -262,7 +262,7 @@ window.addEventListener('DOMContentLoaded', function() {
         return
     }
     // card detail page
-    if (document.URL.startsWith("https://netrunnerdb.com/en/card/")) {
+    if (document.location.pathname.startsWith("/en/card/")) {
         var code = document.URL.split('/').pop()
         overrideCardInfo(document, code)
     }
@@ -274,8 +274,8 @@ window.addEventListener('DOMContentLoaded', function() {
         })
     })
     // deck builder
-    if (document.URL.startsWith("https://netrunnerdb.com/en/deck/") ||
-        document.URL.startsWith("https://netrunnerdb.com/en/decklist/")) {
+    if (document.location.pathname.startsWith("/en/deck/") ||
+        document.location.pathname.startsWith("/en/decklist/")) {
         // format selection
         document.querySelectorAll(".option-format").forEach(elem => {
             elem.innerHTML = swapCodeName(elem.innerHTML, formats)
@@ -344,7 +344,7 @@ window.addEventListener('DOMContentLoaded', function() {
         observeDeckCards()
     }
 
-    if (document.URL.startsWith("https://netrunnerdb.com/en/sets")) {
+    if (document.location.pathname.startsWith("/en/sets")) {
         document.querySelectorAll(".card").forEach(elem => {
             var code = elem.getAttribute("data-index")
             if (packs[code]) {
@@ -354,10 +354,10 @@ window.addEventListener('DOMContentLoaded', function() {
         })
     }
 
-    if (document.URL.startsWith("https://netrunnerdb.com/en/set/") ||
-        document.URL.startsWith("https://netrunnerdb.com/en/cycle/")) {
+    if (document.location.pathname.startsWith("/en/set/") ||
+        document.location.pathname.startsWith("/en/cycle/")) {
         overrideCardResults(document)
-    } else if (document.URL.startsWith("https://netrunnerdb.com/find/")) {
+    } else if (document.location.pathname.startsWith("/find/")) {
         // find can either return card results or a card page
         var elem = document.querySelector(".card-image")
         if (elem) {
