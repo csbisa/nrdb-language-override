@@ -9,7 +9,7 @@ define output_json
 	jq -s add ${1} | jq 'del(..|nulls)' | jq 'INDEX(.code)' | jq -r tostring >> $@
 endef
 
-nrdb-language-override.%.user.js: nrdb-language-override.js.head.in nrdb-language-override.js.tail.in formats.json stats.json display.json langs.json
+nrdb-language-override.%.user.js: nrdb-language-override.js.head.in nrdb-language-override.js.tail.in formats.json stats.json display.json ui.json langs.json
 	@cat nrdb-language-override.js.head.in > $@
 	@echo "var locale = '$*'" >> $@
 	@echo -n "var locale_text = " >> $@
@@ -32,6 +32,8 @@ nrdb-language-override.%.user.js: nrdb-language-override.js.head.in nrdb-languag
 	@jq ".$*" stats.json | jq -r tostring >> $@
 	@echo -n "var display = " >> $@
 	@jq ".$*" display.json | jq -r tostring >> $@
+	@echo -n "var ui = " >> $@
+	@jq ".$*" ui.json | jq -r tostring >> $@
 	@echo >> $@
 	@cat nrdb-language-override.js.tail.in >> $@
 	@echo "GEN	$@"

@@ -113,6 +113,14 @@ function swapEntryNames(basename, entries) {
     return basename
 }
 
+function swapUIText(basename, entries) {
+    Object.entries(entries).map((entry) => {
+        var re = new RegExp(entry[0])
+        basename = basename.replace(re, entry[1])
+    })
+    return basename
+}
+
 function overrideCardImage(elem) {
     var url = elem.getAttribute("data-src")
     if (url) {
@@ -269,8 +277,8 @@ window.addEventListener('DOMContentLoaded', function() {
     // swap header data (every page)
     // just use document.links for this instead?
     document.querySelectorAll('.navbar-nav').forEach(navbar => {
-        navbar.childNodes.forEach(elem => {
-            //console.info(elem)
+        Array.from(navbar.children).forEach(elem => {
+            elem.innerHTML = swapUIText(elem.innerHTML, ui)
         })
     })
     // deck builder
