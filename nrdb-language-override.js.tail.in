@@ -215,13 +215,13 @@ function moveCardCategory(parent, type, dest, child, source) {
     dest.appendChild(child)
     var count = parseInt(child.innerHTML.split('x')[0])
     Array.from(parent.getElementsByTagName('h5')).forEach(elem => {
-        if (elem.children[0].alt == type) {
+        if (elem.children[0].attributes["aria-label"].value == type) {
             var old_count = parseInt(elem.children[1].innerHTML) || 0
             elem.children[1].innerHTML = old_count + count
             if (old_count == 0) {
                 elem.setAttribute("style", "")
             }
-        } else if (elem.children[0].alt == source) {
+        } else if (elem.children[0].attributes["aria-label"].value == source) {
             var old_count = parseInt(elem.children[1].innerHTML)
             elem.children[1].innerHTML = old_count - count
             if ((old_count - count) == 0) {
