@@ -158,7 +158,7 @@ function overrideCardInfo(elem, code) {
         })
         elem.querySelectorAll(".card-flavor").forEach(text => {
             if (card.flavor) {
-                text.innerHTML = card.flavor
+                text.innerHTML = card.flavor.replace(/\n/, "<br>")
             }
         })
         elem.querySelectorAll(".card-type").forEach(type => {
