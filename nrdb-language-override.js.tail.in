@@ -264,8 +264,17 @@ function fixCardCategorization() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+    // swap header data (every page), but only if we're not in english mode
+    if (lang == locale) {
+      document.querySelectorAll('.navbar-nav').forEach(navbar => {
+          Array.from(navbar.children).forEach(elem => {
+              elem.innerHTML = swapUIText(elem.innerHTML, ui)
+          })
+      })
+    }
     // insert our language dropdown
     insertLanguageSelector(document)
+    // nothing else to do if we're in english mode
     if (lang != locale) {
         return
     }
@@ -274,13 +283,7 @@ window.addEventListener('DOMContentLoaded', function() {
         var code = document.URL.split('/').pop()
         overrideCardInfo(document, code)
     }
-    // swap header data (every page)
-    // just use document.links for this instead?
-    document.querySelectorAll('.navbar-nav').forEach(navbar => {
-        Array.from(navbar.children).forEach(elem => {
-            elem.innerHTML = swapUIText(elem.innerHTML, ui)
-        })
-    })
+
     // deck builder
     if (document.location.pathname.startsWith("/en/deck/") ||
         document.location.pathname.startsWith("/en/decklist/")) {
