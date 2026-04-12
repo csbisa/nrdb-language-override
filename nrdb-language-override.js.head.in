@@ -9,7 +9,7 @@
 // @match        https://netrunnerdb.com/*
 // @icon         https://netrunnerdb.com/favicon.ico
 // @grant        none
-// @require      http://jpillora.com/xhook/dist/xhook.js
+// @require      https://unpkg.com/xhook@latest/dist/xhook.min.js
 // @run-at       document-start
 // ==/UserScript==
 
